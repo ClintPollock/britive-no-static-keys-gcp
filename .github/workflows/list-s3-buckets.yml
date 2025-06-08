@@ -12,10 +12,10 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      BRITIVE_TENANT: se-learn  # use lowercase here as pybritive normalizes it
+      BRITIVE_TENANT: se-learn
       BRITIVE_PROFILE_NAME: AWS Standalone/Widgeto Prod/Widgeto-App-S3-Prod-Access
       FED_PROVIDER: github-britive
-      AWS_REGION: us-east-2   # adjust if needed
+      AWS_REGION: us-east-2 
 
     steps:
       - name: Set up Python
