@@ -1,4 +1,4 @@
-name: Britive Federated AWS Access via Credential Process
+name: Britive-Github Federated Access for AWS Keyless via OpenID Connect
 
 on:
   workflow_dispatch:
