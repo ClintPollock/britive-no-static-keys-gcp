@@ -2,7 +2,8 @@ name: Britive Federated AWS Access via Credential Process
 
 on:
   workflow_dispatch:
-
+  schedule:
+    - cron: '0 8 * * *'  # Runs daily at 08:00 UTC
 permissions:
   id-token: write
   contents: read
