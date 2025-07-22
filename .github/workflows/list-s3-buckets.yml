@@ -14,7 +14,7 @@ jobs:
 
     env:
       BRITIVE_TENANT: se-learn
-      BRITIVE_PROFILE_NAME: AWS Standalone/Widgeto Prod/Widgeto-App-S3-Prod-Access
+      BRITIVE_PROFILE_NAME: AWS Standalone/Widgeto Prod/S3-Access-App123
       FED_PROVIDER: github-britive
       AWS_REGION: us-east-2 
 
