@@ -1,0 +1,38 @@
+name: Britive-GitHub Federated Access for GCP via OpenID Connect
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  federated-gcp-access:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install pybritive and gcloud CLI
+        run: |
+          pip install pybritive --quiet
+          sudo apt-get update && sudo apt-get install -y google-cloud-sdk
+
+      - name: Checkout GCP access from Britive and authenticate
+        run: |
+          echo "Checking out GCP login command from Britive..."
+
+          # Suppress echoing
+          set +x
+
+          # Checkout login command and run it silently
+          pybritive checkout -t demo.britive-app.com -m gcloudauth "GCP - CIS/GCP - CIS/LendingSavings Administrator" | grep '^gcloud auth activate-service-account' > gcloud-login.sh
+          chmod +x gcloud-login.sh
+          ./gcloud-login.sh > /dev/null 2>&1
+
+          # Restore echoing
+          set -x
+
+      - name: Confirm GCP Access (safe output)
+        run: |
+          echo "Verifying GCP access..."
+          gcloud config list account --format="value(core.account)"
