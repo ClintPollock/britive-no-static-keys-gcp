@@ -24,7 +24,8 @@ jobs:
           set +x
 
           # Checkout login command and run it silently
-          pybritive checkout -t demo.britive-app.com -m gcloudauth "GCP - CIS/GCP - CIS/LendingSavings Administrator" | grep '^gcloud auth activate-service-account' > gcloud-login.sh
+          pybritive checkout -t demo.britive-app.com -m gcloudauth "GCP - CIS/GCP - CIS/LendingSavings Administrator" --timeout 60 | grep '^gcloud auth activate-service-account' > gcloud-login.sh
+
           chmod +x gcloud-login.sh
           ./gcloud-login.sh > /dev/null 2>&1
 
