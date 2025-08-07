@@ -19,12 +19,7 @@ jobs:
       - name: Checkout GCP access from Britive and authenticate
         run: |
           echo "Checking out GCP login command from Britive..."
-      
-          set +x
-          pybritive checkout -t demo.britive-app.com -m gcloudauth "GCP - CIS/GCP - CIS/LendingSavings Administrator" --blocktime 60 | grep '^gcloud auth activate-service-account' > gcloud-login.sh
-          chmod +x gcloud-login.sh
-          ./gcloud-login.sh > /dev/null 2>&1
-          set -x
+          pybritive checkout -t demo.britive-app.com -m gcloudauth "GCP - CIS/GCP - CIS/LendingSavings Administrator"
 
       - name: Confirm GCP Access (safe output)
         run: |
