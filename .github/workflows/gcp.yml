@@ -15,7 +15,6 @@ jobs:
       - name: Install pybritive and gcloud CLI
         run: |
           pip install pybritive --quiet
-          sudo apt-get update && sudo apt-get install -y google-cloud-sdk
 
       - name: Checkout GCP access from Britive and authenticate
         run: |
