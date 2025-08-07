@@ -2,7 +2,8 @@ name: Britive-GitHub Federated Access for GCP via OpenID Connect
 
 on:
   workflow_dispatch:
-
+  schedule:
+    - cron: '0 8 * * *'  # Runs daily at 08:00 UTC
 permissions:
   id-token: write
   contents: read
@@ -16,15 +17,15 @@ jobs:
         run: |
           pip install pybritive --quiet
 
-    - name: Checkout GCP access from Britive and authenticate
-      run: |
-        echo "Checking out GCP login command from Britive..."
-    
-        set +x
-        pybritive checkout -t demo.britive-app.com -m gcloudauth "GCP - CIS/GCP - CIS/LendingSavings Administrator" -P github-britive | grep '^gcloud auth activate-service-account' > gcloud-login.sh
-        chmod +x gcloud-login.sh
-        ./gcloud-login.sh > /dev/null 2>&1
-    set -x
+      - name: Checkout GCP access from Britive and authenticate
+        run: |
+          echo "Checking out GCP login command from Britive..."
+      
+          set +x
+          pybritive checkout -t demo.britive-app.com -m gcloudauth "GCP - CIS/GCP - CIS/LendingSavings Administrator" -P github-britive | grep '^gcloud auth activate-service-account' > gcloud-login.sh
+          chmod +x gcloud-login.sh
+          ./gcloud-login.sh > /dev/null 2>&1
+          set -x
 
       - name: Confirm GCP Access (safe output)
         run: |
