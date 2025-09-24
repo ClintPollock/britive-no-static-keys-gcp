@@ -12,6 +12,10 @@ jobs:
   federated-gcp-access:
     runs-on: ubuntu-latest
 
+    env:
+      GCS_BUCKET_NAME: acme-corp-backup-storage
+      GCP_PROJECT_ID: "810261868576"
+
     steps:
       - name: Install pybritive and gcloud CLI
         run: |
@@ -31,3 +35,32 @@ jobs:
         run: |
           echo "Verifying GCP access..."
           gcloud config list account --format="value(core.account)"
+          echo "Setting project ID..."
+          gcloud config set project $GCP_PROJECT_ID
+
+      - name: Test GCS Access - List Storage Buckets
+        run: |
+          echo "Listing GCS buckets..."
+          gsutil ls
+          echo "Checking backup bucket..."
+          gsutil ls gs://$GCS_BUCKET_NAME/ || echo "Bucket contents empty or inaccessible"
+
+      - name: Create Daily Backup File in GCS
+        run: |
+          # Generate current date in YYYY-MM-DD format
+          BACKUP_DATE=$(date +%Y-%m-%d)
+          BACKUP_FILENAME="Backup-${BACKUP_DATE}.bak"
+          
+          echo "Creating backup file: $BACKUP_FILENAME"
+          
+          # Create temporary file with backup content
+          echo "Daily Backup $BACKUP_DATE" > /tmp/$BACKUP_FILENAME
+          
+          # Upload to GCS bucket
+          gsutil cp /tmp/$BACKUP_FILENAME gs://$GCS_BUCKET_NAME/$BACKUP_FILENAME
+          
+          echo "Successfully created backup file: gs://$GCS_BUCKET_NAME/$BACKUP_FILENAME"
+          
+          # Optional: List files in bucket to confirm upload
+          echo "Current files in backup bucket:"
+          gsutil ls gs://$GCS_BUCKET_NAME/
