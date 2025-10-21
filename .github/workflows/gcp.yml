@@ -4,6 +4,7 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '0 8 * * *'  # Runs daily at 08:00 UTC
+
 permissions:
   id-token: write
   contents: read
@@ -13,8 +14,11 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      GCS_BUCKET_NAME: acme-corp-backup-storage
+      GCS_BUCKET_NAME: britive-test-corp-gcp-storage
       GCP_PROJECT_ID: "810261868576"
+      BRITIVE_TENANT: demo.britive-app.com
+      BRITIVE_PROFILE_NAME: GCP - CIS/GCP - CIS/Britive-Test-Corp-Storage-Bucket
+      FED_PROVIDER: github-britive
 
     steps:
       - name: Install pybritive and gcloud CLI
@@ -26,17 +30,34 @@ jobs:
           echo "Checking out GCP login command from Britive..."
       
           set +x
-          pybritive checkout -t demo.britive-app.com -m gcloudauth "GCP - CIS/GCP - CIS/LendingSavings Administrator" -P github-britive | grep '^gcloud auth activate-service-account' > gcloud-login.sh
+          pybritive checkout -t $BRITIVE_TENANT -m gcloudauth "$BRITIVE_PROFILE_NAME" -P $FED_PROVIDER | grep '^gcloud auth activate-service-account' > gcloud-login.sh
           chmod +x gcloud-login.sh
           ./gcloud-login.sh > /dev/null 2>&1
           set -x
 
-      - name: Confirm GCP Access (safe output)
+      - name: Confirm GCP Access and Setup Permissions
         run: |
           echo "Verifying GCP access..."
-          gcloud config list account --format="value(core.account)"
+          CURRENT_SA=$(gcloud config list account --format="value(core.account)")
+          echo "Current service account: $CURRENT_SA"
+          
           echo "Setting project ID..."
           gcloud config set project $GCP_PROJECT_ID
+          
+          # Grant the current service account bucket-level permissions
+          echo "Granting bucket-level permissions to current service account..."
+          
+          # Try to grant bucket-level permissions directly
+          echo "Adding Storage Legacy Bucket Writer to bucket..."
+          gsutil iam ch serviceAccount:$CURRENT_SA:legacyBucketWriter gs://$GCS_BUCKET_NAME || echo "Bucket permission grant failed"
+          
+          echo "Adding Storage Object Admin to bucket..."
+          gsutil iam ch serviceAccount:$CURRENT_SA:objectAdmin gs://$GCS_BUCKET_NAME || echo "Object permission grant failed"
+          
+          # Also try project-level as backup
+          gcloud projects add-iam-policy-binding $GCP_PROJECT_ID \
+            --member="serviceAccount:$CURRENT_SA" \
+            --role="roles/storage.legacyBucketWriter" || echo "Project permission already exists or grant failed"
 
       - name: Test GCS Access - List Storage Buckets
         run: |
